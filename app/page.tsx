@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import "../App.css";
+import Image from "next/image";
 import { formatDate } from "../app/_utils/formatDate";
 import { useState } from "react";
 import { useEffect } from "react";
@@ -23,6 +23,7 @@ export default function Posts() {
           "https://1hmfpsvto6.execute-api.ap-northeast-1.amazonaws.com/dev/posts",
         );
         const data = await res.json(); //resをjsオブジェクトに変換
+        console.log(data.posts[0].thumbnailUrl);
         setPosts(data.posts); //dataをpostsに入れてデータを保持する。
       } catch (e) {
         //eにはエラー情報が入っている、
@@ -62,20 +63,23 @@ export default function Posts() {
           key={post.id}
           className="grid grid-cols-[200px_1fr] gap-4 border-b border-[#e5e7eb] max-w-3xl mx-auto"
         >
-          <image
-            href={post.thumbnailUrl}
+          <Image
+            height={116}
+            width={157}
+            src={post.thumbnailUrl}
             className="w-fit h-30 shrink-0 object-cover m-3"
+            alt="記事の画像です"
           />
-          <ul className="text-black">
-            <li>
+          <div className="text-black">
+            <p>
               {formatDate(post.createdAt)},{post.categories}
-            </li>
-            <li className="font-bold">{post.title}</li>
-            <li
-              className="text-sm1 text-gray-700 overflow-hidden line-clamp-2"
+            </p>
+            <p className="font-bold">{post.title}</p>
+            <p
+              className="text-sm text-gray-700 overflow-hidden line-clamp-2"
               dangerouslySetInnerHTML={{ __html: post.content }}
-            ></li>
-          </ul>
+            />
+          </div>
         </Link>
       ))}
     </div>

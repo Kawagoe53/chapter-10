@@ -2,10 +2,9 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import "../globals.css";
-import { formatDate } from "../_utils/formatDate";
+import { formatDate } from "../../_utils/formatDate";
 import { useState, useEffect } from "react";
-import type { Post } from "../_types/post";
+import type { Post } from "../../_types/post";
 import { useParams } from "next/navigation";
 
 export default function PostDetail() {
