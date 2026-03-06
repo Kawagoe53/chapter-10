@@ -1,65 +1,87 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import Link from "next/link";
+import Image from "next/image";
+import { formatDate } from "../app/_utils/formatDate";
+import { useState } from "react";
+import { useEffect } from "react";
+import type { Post } from "../app/_types/post";
+
+export default function Posts() {
+  const [posts, setPosts] = useState<Post[]>([]); //データの保持するためにpostsという空箱を用意する
+  const [error, setError] = useState<string | null>(null); //最初はエラーないからnull
+  const [isLoading, setIsLoading] = useState(true); //読み込み中の状態管理
+  //初期値をtrueにすると、このステートはboleanだと推論されるので型を明示しなくても大丈夫です！
+  useEffect(() => {
+    const fetcher = async () => {
+      // useEffectに直接asyncをつけるとPromiseが返ってきてしまうため、
+      // 中にasync関数を定義して呼び出す
+      try {
+        //tryの中でうまくいかなかったらcatchの処理に映る
+        const res = await fetch(
+          //情報を取得(まだ封筒状態で中身は見えない)
+          "https://1hmfpsvto6.execute-api.ap-northeast-1.amazonaws.com/dev/posts",
+        );
+        const data = await res.json(); //resをjsオブジェクトに変換
+        console.log(data.posts[0].thumbnailUrl);
+        setPosts(data.posts); //dataをpostsに入れてデータを保持する。
+      } catch (e) {
+        //eにはエラー情報が入っている、
+        console.log(e); //開発者様のエラー表示
+        setError("エラーが発生しました"); //ユーザー用のエラー表示
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetcher(); //関数を実行
+  }, []);
+  if (isLoading) {
+    return (
+      <div className="max-w-3xl mx-auto p-8">
+        <p>ローディング中...</p>
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="max-w-3xl mx-auto bg-white p-8">
+        <p className="text-red-600">{error}</p>
+        <Link href="/" className="text-blue-600">
+          一覧へ戻る
+        </Link>
+      </div>
+    );
+  }
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+    <div className="bg-white min-h-screen min-w-screen">
+      <h1 className="text-black flex justify-center text-5xl">記事一覧</h1>
+
+      {posts.map((post) => (
+        <Link
+          href={`/posts/${post.id}`}
+          key={post.id}
+          className="grid grid-cols-[200px_1fr] gap-4 border-b border-[#e5e7eb] max-w-3xl mx-auto"
+        >
+          <Image
+            height={116}
+            width={157}
+            src={post.thumbnailUrl}
+            className="w-fit h-30 shrink-0 object-cover m-3"
+            alt="記事の画像です"
+          />
+          <div className="text-black">
+            <p>
+              {formatDate(post.createdAt)},{post.categories}
+            </p>
+            <p className="font-bold">{post.title}</p>
+            <p
+              className="text-sm text-gray-700 overflow-hidden line-clamp-2"
+              dangerouslySetInnerHTML={{ __html: post.content }}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+          </div>
+        </Link>
+      ))}
     </div>
   );
 }
