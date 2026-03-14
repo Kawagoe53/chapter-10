@@ -1,15 +1,12 @@
+import type { NextConfig } from "next";
+
 const nextConfig = {
   images: {
-    dangerouslyAllowLocalIP: process.env.NODE_ENV === "development",
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "placehold.jp",
-        port: "",
-        pathname: "/**",
-      },
+      { protocol: "https", hostname: "placehold.jp" },
+      { protocol: "https", hostname: "images.microcms-assets.io" }, // これを追加
     ],
   },
 };
+
 export default nextConfig;
-//next/image を使う時のセキュリティ設定。
