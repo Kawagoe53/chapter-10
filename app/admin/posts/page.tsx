@@ -1,28 +1,22 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { Post, PostIndexResponse } from "@/app/_types/Posts";
 import Link from "next/link";
+import { formatDate } from "@/app/_utils/formatDate";
 import Image from "next/image";
-import { formatDate } from "../app/_utils/formatDate";
-import { useState } from "react";
-import { useEffect } from "react";
-import { Post, PostsIndexResponse } from "./_types/Posts";
 
-export default function Posts() {
-  const [posts, setPosts] = useState<Post[]>([]);
+export default function AdminPosts() {
+  const [adminPosts, setAdminPosts] = useState<Post[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetcher = async () => {
       try {
-        const res = await fetch("/api/posts");
-        if (!res.ok) {
-          setError("取得に失敗しました");
-          return;
-        }
-        const data: PostsIndexResponse = await res.json();
-        //型を明示
-        setPosts(data.posts);
+        const res = await fetch("/api/admin/posts");
+        const data: PostIndexResponse = await res.json();
+        setAdminPosts(data.posts);
       } catch (e) {
         console.log(e);
         setError("エラーが発生しました");
@@ -50,13 +44,22 @@ export default function Posts() {
       </div>
     );
   }
-  return (
-    <div className="bg-white min-h-screen">
-      <h1 className="text-black flex justify-center text-5xl">記事一覧</h1>
 
-      {posts.map((post) => (
+  return (
+    <div className="bg-white min-h-screen ">
+      <div className="relative flex items-center justify-center py-4">
+        <h1 className="text-black text-5xl">記事一覧</h1>
         <Link
-          href={`/posts/${post.id}`}
+          href="/admin/posts/new"
+          className="hover:bg-blue-500 absolute right-4 bg-blue-600 text-white px-4 py-2 rounded font-bold"
+        >
+          新規作成
+        </Link>
+      </div>
+
+      {adminPosts.map((post) => (
+        <Link
+          href={`/admin/posts/${post.id}`}
           key={post.id}
           className="grid grid-cols-[200px_1fr] gap-4 border-b border-[#e5e7eb] max-w-3xl mx-auto"
         >
@@ -64,7 +67,7 @@ export default function Posts() {
             height={116}
             width={157}
             src={
-              post.thumbnailUrl.startsWith("http")
+              post.thumbnailUrl.startsWith("https")
                 ? post.thumbnailUrl
                 : "https://placehold.co/157x116"
             }

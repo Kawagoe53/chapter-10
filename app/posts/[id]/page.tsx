@@ -4,32 +4,26 @@ import Link from "next/link";
 import Image from "next/image";
 import { formatDate } from "../../_utils/formatDate";
 import { useState, useEffect } from "react";
-import type { Post } from "../../_types/post";
 import { useParams } from "next/navigation";
-import { MicroCmsPost } from "@/app/_types/MicroCmsPost";
+import { Post, PostShowResponse } from "@/app/_types/Posts";
 
 export default function PostDetail() {
   const { id } = useParams();
   const [error, setError] = useState<string | null>(null);
-  const [post, setPostDetail] = useState<MicroCmsPost | null>(null);
+  const [post, setPostDetail] = useState<Post | null>(null);
   const [isLoading, setIsLoading] = useState(true); //読み込み中の状態管理
 
   useEffect(() => {
     const fetcher = async () => {
       try {
-        const res = await fetch(
-          `https://xnbhacnf5s.microcms.io/api/v1/posts/${id}`,
-          {
-            //管理画面で取得したエンドポイントを入力してください
-            headers: {
-              //fetch関数の第二引数にheadersを設定でき、その中にAPIキーを設定します。
-              "X-MICROCMS-API-KEY": process.env
-                .NEXT_PUBLIC_MICROCMS_API_KEY as string, // 管理画面で取得したAPIキーを入力してください。
-            },
-          },
-        );
-        const data = await res.json();
-        setPostDetail(data);
+        const res = await fetch(`/api/posts/${id}`);
+        if (!res.ok) {
+          setError("取得に失敗しました");
+          return;
+        }
+        const data: PostShowResponse = await res.json();
+        //型を明示
+        setPostDetail(data.post);
       } catch (e) {
         console.log(e);
         setError("エラーが発生しました");
@@ -66,13 +60,18 @@ export default function PostDetail() {
       <Image
         height={116}
         width={157}
-        src={post.thumbnail.url}
+        src={
+          post.thumbnailUrl.startsWith("http")
+            ? post.thumbnailUrl
+            : "https://placehold.co/157x116"
+        }
         className="w-full h-auto object-cover mb-4"
         alt="記事の画像です"
       />
       <div className="text-black">
         <p className="text-sm text-gray-600">
-          {formatDate(post.createdAt)}, [categories]
+          {formatDate(post.createdAt)},{" "}
+          {post.postCategories.map((pc) => pc.category.name).join(", ")}
         </p>
         <h1 className="font-bold text-2xl my-4">{post.title}</h1>
         <div
