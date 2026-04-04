@@ -36,6 +36,7 @@ export default function FixAdminPost() {
   >([]);
 
   useEffect(() => {
+    setIsLoading(true);
     const fetcher = async () => {
       try {
         const res = await fetch(`/api/admin/posts/${id}`);
@@ -54,7 +55,7 @@ export default function FixAdminPost() {
           })),
         });
       } catch (e) {
-        console.log(e);
+        console.error(e);
         setError("エラーが発生しました");
       } finally {
         setIsLoading(false);
@@ -65,6 +66,7 @@ export default function FixAdminPost() {
   }, [id]);
 
   useEffect(() => {
+    setIsLoading(true);
     const getCategories = async () => {
       try {
         const res = await fetch("/api/admin/categories");
@@ -75,14 +77,17 @@ export default function FixAdminPost() {
         const data: CategoriesIndexResponse = await res.json();
         setCategories(data.categories);
       } catch (e) {
-        console.log(e);
+        console.error(e);
         setError("エラーが発生しました。");
+      } finally {
+        setIsLoading(false);
       }
     };
     getCategories();
   }, []);
 
   const updateHandleSubmit = async () => {
+    setIsLoading(true);
     try {
       const res = await fetch(`/api/admin/posts/${id}`, {
         method: "PUT",
@@ -97,12 +102,15 @@ export default function FixAdminPost() {
       }
       router.push("/admin/posts"); //成功したらリダイレクトする
     } catch (e) {
-      console.log(e); //開発者用
+      console.error(e); //開発者用
       setError("エラーが発生しました"); //ユーザー用
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const deleteHandleSubmit = async () => {
+    setIsLoading(true);
     try {
       const res = await fetch(`/api/admin/posts/${id}`, {
         method: "DELETE",
@@ -113,8 +121,10 @@ export default function FixAdminPost() {
       }
       router.push("/admin/posts"); //成功したらリダイレクトする
     } catch (e) {
-      console.log(e); //開発者用
+      console.error(e); //開発者用
       setError("エラーが発生しました"); //ユーザー用
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -145,6 +155,7 @@ export default function FixAdminPost() {
         <div className="flex flex-col gap-1">
           <label className="font-bold text-gray-700">タイトル</label>
           <input
+            disabled={isLoading}
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
             type="text"
@@ -155,6 +166,7 @@ export default function FixAdminPost() {
         <div className="flex flex-col gap-1">
           <label className="font-bold text-gray-700">サムネイルURL</label>
           <input
+            disabled={isLoading}
             value={form.thumbnailUrl}
             onChange={(e) => setForm({ ...form, thumbnailUrl: e.target.value })}
             type="text"
@@ -165,6 +177,7 @@ export default function FixAdminPost() {
         <div className="flex flex-col gap-1">
           <label className="font-bold text-gray-700">本文</label>
           <textarea
+            disabled={isLoading}
             value={form.content}
             onChange={(e) => setForm({ ...form, content: e.target.value })}
             className="border border-gray-300 rounded px-3 py-2 h-48 resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -177,6 +190,7 @@ export default function FixAdminPost() {
             {categories.map((category) => (
               <div key={category.id} className="flex items-center gap-1">
                 <input
+                  disabled={isLoading}
                   id={`${category.id}`} //htmlForと繋げることで文字を押してもチェックが入る
                   type="checkbox"
                   checked={form.categories.some((c) => c.id === category.id)}
@@ -206,6 +220,7 @@ export default function FixAdminPost() {
 
         <div>
           <button
+            disabled={isLoading}
             onClick={updateHandleSubmit}
             className="bg-green-500 hover:bg-green-200 text-white font-bold py-2 px-6 rounded self-end"
           >
@@ -213,6 +228,7 @@ export default function FixAdminPost() {
           </button>
 
           <button
+            disabled={isLoading}
             onClick={deleteHandleSubmit}
             className="bg-red-500 hover:bg-red-200 text-white font-bold py-2 px-6 rounded self-end"
           >

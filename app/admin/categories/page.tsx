@@ -13,6 +13,7 @@ export default function AdminPosts() {
 
   useEffect(() => {
     const fetcher = async () => {
+      setIsLoading(true);
       try {
         const res = await fetch("/api/admin/categories");
         if (!res.ok) {
@@ -22,7 +23,7 @@ export default function AdminPosts() {
         const data: CategoriesIndexResponse = await res.json();
         setAdminCategories(data.categories);
       } catch (e) {
-        console.log(e);
+        console.error(e);
         setError("エラーが発生しました");
       } finally {
         setIsLoading(false);

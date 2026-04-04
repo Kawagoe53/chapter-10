@@ -24,7 +24,7 @@ export default function Posts() {
         //型を明示
         setPosts(data.posts);
       } catch (e) {
-        console.log(e);
+        console.error(e);
         setError("エラーが発生しました");
       } finally {
         setIsLoading(false);

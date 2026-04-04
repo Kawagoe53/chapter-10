@@ -18,7 +18,7 @@ export default function AdminPosts() {
         const data: PostIndexResponse = await res.json();
         setAdminPosts(data.posts);
       } catch (e) {
-        console.log(e);
+        console.error(e);
         setError("エラーが発生しました");
       } finally {
         setIsLoading(false);

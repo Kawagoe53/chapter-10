@@ -28,6 +28,7 @@ export default function FixAdminPost() {
 
   useEffect(() => {
     const fetcher = async () => {
+      setIsLoading(true);
       try {
         const res = await fetch(`/api/admin/categories/${id}`);
         if (!res.ok) {
@@ -40,7 +41,7 @@ export default function FixAdminPost() {
           name: data.category.name,
         });
       } catch (e) {
-        console.log(e);
+        console.error(e);
         setError("エラーが発生しました");
       } finally {
         setIsLoading(false);
@@ -51,13 +52,18 @@ export default function FixAdminPost() {
   }, [id]);
 
   const updateHandleSubmit = async () => {
+    setIsLoading(true);
     try {
+      const requestBody: UpdateCategoryRequestBody = {
+        name: form.name,
+      };
       const res = await fetch(`/api/admin/categories/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(form),
+
+        body: JSON.stringify(requestBody),
       });
       if (!res.ok) {
         setError("更新を失敗しました");
@@ -65,12 +71,15 @@ export default function FixAdminPost() {
       }
       router.push("/admin/categories"); //成功したらリダイレクトする
     } catch (e) {
-      console.log(e); //開発者用
+      console.error(e); //開発者用
       setError("エラーが発生しました"); //ユーザー用
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const deleteHandleSubmit = async () => {
+    setIsLoading(true);
     try {
       const res = await fetch(`/api/admin/categories/${id}`, {
         method: "DELETE",
@@ -81,8 +90,10 @@ export default function FixAdminPost() {
       }
       router.push("/admin/categories"); //成功したらリダイレクトする
     } catch (e) {
-      console.log(e); //開発者用
+      console.error(e); //開発者用
       setError("エラーが発生しました"); //ユーザー用
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -113,6 +124,7 @@ export default function FixAdminPost() {
         <div className="flex flex-col gap-1">
           <label className="font-bold text-gray-700">カテゴリー名</label>
           <input
+            disabled={isLoading}
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             type="text"
@@ -122,6 +134,7 @@ export default function FixAdminPost() {
 
         <div>
           <button
+            disabled={isLoading}
             onClick={updateHandleSubmit}
             className="bg-green-500 hover:bg-green-200 text-white font-bold py-2 px-6 rounded self-end"
           >
@@ -129,6 +142,7 @@ export default function FixAdminPost() {
           </button>
 
           <button
+            disabled={isLoading}
             onClick={deleteHandleSubmit}
             className="bg-red-500 hover:bg-red-200 text-white font-bold py-2 px-6 rounded self-end"
           >

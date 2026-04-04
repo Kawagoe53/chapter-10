@@ -9,6 +9,7 @@
 import { useState } from "react";
 import { CreateCategoryRequestBody } from "@/app/_types/Posts";
 import { useRouter } from "next/navigation";
+import TextInput from "@/app/_components/TextInput";
 
 export default function CreateNewPost() {
   // フォームの入力値（オブジェクト1つ）が入ってくる
@@ -17,8 +18,10 @@ export default function CreateNewPost() {
   });
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true); //読み込み中の状態管理
 
   const handleSubmit = async () => {
+    setIsLoading(true);
     try {
       const res = await fetch("/api/admin/categories", {
         method: "POST",
@@ -34,8 +37,10 @@ export default function CreateNewPost() {
       }
       router.push("/admin/categories"); //成功したらリダイレクトする
     } catch (e) {
-      console.log(e); //開発者用
+      console.error(e); //開発者用
       setError("エラーが発生しました"); //ユーザー用
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -45,17 +50,15 @@ export default function CreateNewPost() {
       {error && <p className="text-red-500 mb-4">{error}</p>}
 
       <div className="flex flex-col gap-6">
-        <div className="flex flex-col gap-1">
-          <label className="font-bold text-gray-700">カテゴリー名</label>
-          <input
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            type="text"
-            className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
-        </div>
+        <TextInput
+          disabled={isLoading}
+          label="カテゴリー名"
+          value={form.name}
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+        />
 
         <button
+          disabled={isLoading}
           onClick={handleSubmit}
           className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded self-end"
         >
