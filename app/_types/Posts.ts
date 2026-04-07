@@ -30,7 +30,7 @@ export type CategoriesIndexResponse = {
   }[];
 };
 
-export type CreatePostRequestBody = {
+export type PostRequestBody = {
   title: string;
   content: string;
   categories: { id: number }[];
@@ -58,18 +58,7 @@ export type PostIndexResponse = {
   }[];
 };
 
-export type UpdatePostRequestBody = {
-  title: string;
-  content: string;
-  categories: { id: number }[];
-  thumbnailUrl: string;
-};
-
-export type CreateCategoryRequestBody = {
-  name: string;
-};
-
-export type UpdateCategoryRequestBody = {
+export type CategoryRequestBody = {
   name: string;
 };
 

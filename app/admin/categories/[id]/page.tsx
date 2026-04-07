@@ -7,28 +7,22 @@
 
 "use client";
 
-import {
-  UpdateCategoryRequestBody,
-  CategoryShowResponse,
-} from "@/app/_types/Posts";
+import { CategoryRequestBody, CategoryShowResponse } from "@/app/_types/Posts";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Form } from "../_components/Form";
 
-export default function FixAdminPost() {
+export default function FixAdminCategory() {
   const { id } = useParams();
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true); //読み込み中の状態管理
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-  const [form, setForm] = useState<UpdateCategoryRequestBody>({
-    //これはAPIに送るデータの型
-    name: "",
-  });
+  const [data, setData] = useState<CategoryRequestBody | null>(null);
 
   useEffect(() => {
     const fetcher = async () => {
-      setIsLoading(true);
       try {
         const res = await fetch(`/api/admin/categories/${id}`);
         if (!res.ok) {
@@ -36,10 +30,7 @@ export default function FixAdminPost() {
           return;
         }
         const data: CategoryShowResponse = await res.json(); //これはAPIから受け取るデータの型
-        setForm({
-          //UpdateCategoryRequestBodyはAPIに送るデータの型
-          name: data.category.name,
-        });
+        setData({ name: data.category.name });
       } catch (e) {
         console.error(e);
         setError("エラーが発生しました");
@@ -51,11 +42,10 @@ export default function FixAdminPost() {
     fetcher();
   }, [id]);
 
-  const updateHandleSubmit = async () => {
-    setIsLoading(true);
+  const updateHandleSubmit = async (data: CategoryRequestBody) => {
     try {
-      const requestBody: UpdateCategoryRequestBody = {
-        name: form.name,
+      const requestBody: CategoryRequestBody = {
+        name: data.name,
       };
       const res = await fetch(`/api/admin/categories/${id}`, {
         method: "PUT",
@@ -69,17 +59,15 @@ export default function FixAdminPost() {
         setError("更新を失敗しました");
         return;
       }
+      alert("更新しました");
       router.push("/admin/categories"); //成功したらリダイレクトする
     } catch (e) {
       console.error(e); //開発者用
       setError("エラーが発生しました"); //ユーザー用
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const deleteHandleSubmit = async () => {
-    setIsLoading(true);
     try {
       const res = await fetch(`/api/admin/categories/${id}`, {
         method: "DELETE",
@@ -88,12 +76,11 @@ export default function FixAdminPost() {
         setError("削除失敗しました");
         return;
       }
+      alert("更新しました");
       router.push("/admin/categories"); //成功したらリダイレクトする
     } catch (e) {
       console.error(e); //開発者用
       setError("エラーが発生しました"); //ユーザー用
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -114,42 +101,25 @@ export default function FixAdminPost() {
       </div>
     );
   }
+  if (!data) {
+    return (
+      <div className="max-w-3xl mx-auto p-8">
+        <p>データがありません</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-8">カテゴリー編集</h1>
       {error && <p className="text-red-500 mb-4">{error}</p>}
 
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col gap-1">
-          <label className="font-bold text-gray-700">カテゴリー名</label>
-          <input
-            disabled={isLoading}
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            type="text"
-            className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
-        </div>
-
-        <div>
-          <button
-            disabled={isLoading}
-            onClick={updateHandleSubmit}
-            className="bg-green-500 hover:bg-green-200 text-white font-bold py-2 px-6 rounded self-end"
-          >
-            更新
-          </button>
-
-          <button
-            disabled={isLoading}
-            onClick={deleteHandleSubmit}
-            className="bg-red-500 hover:bg-red-200 text-white font-bold py-2 px-6 rounded self-end"
-          >
-            削除
-          </button>
-        </div>
-      </div>
+      <Form
+        onSubmit={updateHandleSubmit}
+        deleteHandleSubmit={deleteHandleSubmit}
+        mode="edit"
+        defaultValues={data}
+      />
     </div>
   );
 }

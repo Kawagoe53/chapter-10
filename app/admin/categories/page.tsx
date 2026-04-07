@@ -13,7 +13,6 @@ export default function AdminPosts() {
 
   useEffect(() => {
     const fetcher = async () => {
-      setIsLoading(true);
       try {
         const res = await fetch("/api/admin/categories");
         if (!res.ok) {

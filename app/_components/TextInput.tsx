@@ -1,4 +1,3 @@
-// components/TextInput.tsx
 type Props = {
   label: string;
 } & React.InputHTMLAttributes<HTMLInputElement>;
