@@ -114,6 +114,7 @@ export default function FixAdminPost() {
         setError("削除失敗しました");
         return;
       }
+      alert("削除しました");
       router.push("/admin/posts"); //成功したらリダイレクトする
     } catch (e) {
       console.error(e); //開発者用
