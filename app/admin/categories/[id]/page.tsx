@@ -76,7 +76,7 @@ export default function FixAdminCategory() {
         setError("削除失敗しました");
         return;
       }
-      alert("更新しました");
+      alert("削除しました");
       router.push("/admin/categories"); //成功したらリダイレクトする
     } catch (e) {
       console.error(e); //開発者用
